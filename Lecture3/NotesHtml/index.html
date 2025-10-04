@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ThinkBoard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <h1 class="navbar-title">ThinkBoard</h1>
+      <button class="btn btn-primary" onclick="showCreatePage()">
+        <i class="fas fa-plus"></i>
+        <span>New Note</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <div class="main-container">
+    <!-- Home Page -->
+    <div id="homePage" class="page active">
+      <div class="container">
+        <div id="loadingMessage" class="loading-message" style="display: none;">
+          Loading notes...
+        </div>
+
+        <div id="notesNotFound" class="notes-not-found" style="display: none;">
+          <div class="not-found-icon">
+            <i class="fas fa-book"></i>
+          </div>
+          <h3>No notes yet</h3>
+          <p>Ready to organize your thoughts? Start your journey by creating your first note.</p>
+          <button class="btn btn-primary" onclick="showCreatePage()">
+            Create Your First Note
+          </button>
+        </div>
+
+        <div id="notesGrid" class="notes-grid" style="display: none;">
+          <!-- Notes will be dynamically inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Page -->
+    <div id="createPage" class="page">
+      <div class="container">
+        <div class="page-header">
+          <button class="btn btn-ghost" onclick="showHomePage()">
+            <i class="fas fa-arrow-left"></i>
+            Back to Notes
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Create a New Note</h2>
+            <form id="createNoteForm">
+              <div class="form-group">
+                <label for="noteTitle">Title</label>
+                <input type="text" id="noteTitle" placeholder="Note title" required>
+              </div>
+
+              <div class="form-group">
+                <label for="noteContent">Content</label>
+                <textarea id="noteContent" placeholder="Write your note here..." rows="6" required></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="createBtn">
+                  <span id="createBtnText">Create Note</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Note Detail/Edit Page -->
+    <div id="noteDetailPage" class="page">
+      <div class="container">
+        <div class="page-header">
+          <button class="btn btn-ghost" onclick="showHomePage()">
+            <i class="fas fa-arrow-left"></i>
+            Back to Notes
+          </button>
+          <button class="btn btn-error btn-outline" onclick="deleteCurrentNote()">
+            <i class="fas fa-trash"></i>
+            Delete Note
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="form-group">
+              <label for="editNoteTitle">Title</label>
+              <input type="text" id="editNoteTitle" placeholder="Note title">
+            </div>
+
+            <div class="form-group">
+              <label for="editNoteContent">Content</label>
+              <textarea id="editNoteContent" placeholder="Write your note here..." rows="6"></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="saveCurrentNote()" id="saveBtn">
+                <span id="saveBtnText">Save Changes</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- JS file -->
+  <script src="script.js"></script>
+</body>
+</html>
