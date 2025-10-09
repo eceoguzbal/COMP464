@@ -1,0 +1,40 @@
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
+import path from "path";
+import helmet from "helmet";
+import bookRoutes from "./routes/bookRoutes.js";
+import userRoutes from "./routes/authRoutes.js";
+import loanRoutes from "./routes/loanRoutes.js";
+import reservationRoutes from "./routes/reservationRoutes.js";
+import { errorMiddleware } from "./middlewares/errorMiddleware.js";
+import { httpLogger } from "./utils/logger.js";
+
+const app = express();
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn-uicons.flaticon.com", "https://cdn.jsdelivr.net"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdn-uicons.flaticon.com", "https://cdn.jsdelivr.net"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+    },
+  },
+}));
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(process.cwd(), "public")));
+app.use(httpLogger);
+
+app.use("/api/books", bookRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/loans", loanRoutes);
+app.use("/api/reservations", reservationRoutes);
+
+
+app.use(errorMiddleware);
+
+export default app;
