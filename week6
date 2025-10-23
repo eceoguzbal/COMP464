@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOA E-commerce Simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; 
+        }
+        .service-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s;
+        }
+        .service-card:hover {
+            transform: translateY(-2px); 
+        }
+        .console-log {
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #1a202c; 
+            color: #a0aec0;
+            font-family: 'Consolas', 'Monospace', monospace;
+            font-size: 0.875rem;
+        }
+        /* Yeni: Tablo için hafif şerit efekti */
+        #product-list table tbody tr:nth-child(odd) {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="max-w-4xl mx-auto">
+        
+        <header class="text-center mb-10 p-6 bg-white rounded-xl shadow-lg">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">
+                E-commerce SOA Demo <span class="text-xl text-indigo-500">(Simulated Services)</span>
+            </h1>
+            <p class="text-lg text-gray-600 mt-2">
+                Service-Oriented Architecture
+            </p>
+        </header>
+
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+            
+            <div class="service-card p-5 bg-white rounded-xl">
+                <div class="flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                    <h2 class="font-bold text-xl text-green-600">1. Product Service</h2>
+                </div>
+                <p class="text-sm text-gray-700">Manages inventory and pricing. Only interacts with its own data.</p>
+                <code class="text-xs mt-3 block text-gray-500 bg-gray-100 p-2 rounded">API: getProduct(id), checkStock(id)</code>
+            </div>
+            
+            <div class="service-card p-5 bg-white rounded-xl">
+                <div class="flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <h2 class="font-bold text-xl text-blue-600">2. User Service</h2>
+                </div>
+                <p class="text-sm text-gray-700">Manages user data. Only verifies user existence.</p>
+                <code class="text-xs mt-3 block text-gray-500 bg-gray-100 p-2 rounded">API: getUser(id)</code>
+            </div>
+            
+            <div class="service-card p-5 bg-white rounded-xl">
+                <div class="flex items-center mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <h2 class="font-bold text-xl text-red-600">3. Order Service</h2>
+                </div>
+                <p class="text-sm text-gray-700">Creates orders. **Relies on the other two services**.</p>
+                <code class="text-xs mt-3 block text-gray-500 bg-gray-100 p-2 rounded">Dependencies: Product, User</code>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl service-card mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">Current Catalog & Users</h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-medium text-gray-600 mb-2">Products (Try ID 101, 102)</h3>
+                    <div id="product-list" class="overflow-x-auto border rounded-lg shadow-sm"></div> 
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-600 mb-2">Users (Try ID 501, 502, 503)</h3>
+                    <div id="user-list" class="bg-white p-1 rounded-lg border"></div> 
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl service-card mb-8">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4 border-b pb-2">Place New Order (Order Service API Call)</h2>
+            <div class="grid sm:grid-cols-3 gap-4 mb-4">
+                <input id="userId" type="number" placeholder="User ID (e.g., 501)" value="501" class="p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                <input id="productId" type="number" placeholder="Product ID (e.g., 101)" value="101" class="p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                <input id="quantity" type="number" placeholder="Quantity (e.g., 1)" value="1" min="1" class="p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <button id="placeOrderBtn" onclick="handlePlaceOrder()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition duration-150 shadow-md hover:shadow-lg">
+                Place Order
+            </button>
+        </div>
+
+        <div class="service-card p-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3 border-b pb-2">Service Communication Log</h2>
+            <div id="log-console" class="console-log p-4 rounded-lg space-y-1">
+                <p class="text-green-400">System Ready. Place an order above to see service interactions.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ======================================================================
+        // [1] UTILITIES (log.js)
+        // ======================================================================
+        const logConsole = document.getElementById('log-console');
+        
+        /**
+         * Utility function to log messages to the UI console.
+         * @param {string} message - The log content.
+         * @param {string} color - Tailwind color class for the message.
+         */
+        const log = (message, color = 'text-gray-400') => {
+            const time = new Date().toLocaleTimeString();
+            const p = document.createElement('p');
+            p.className = color;
+            p.innerHTML = `<span class="text-gray-500 mr-2">[${time}]</span> ${message}`;
+            logConsole.prepend(p);
+        };
+
+        // ======================================================================
+        // [2] SIMULATED DATABASE / DATA STORE (data.js)
+        // ======================================================================
+        let products = {
+            101: { id: 101, name: "Phone Case", price: 19.99, stock: 100 },
+            102: { id: 102, name: "Airpods", price: 8999.99, stock: 25 },
+            103: { id: 103, name: "Charge Cable", price: 29.99, stock: 40 }
+        };
+        const users = {
+            501: { id: 501, name: "Ece Oguzbal", email: "ece@example.com" },
+            502: { id: 502, name: "Ruken Yıldız", email: "ruken@example.com" },
+            503: { id: 503, name: "Tugce Akay", email: "tugce@example.com" }
+        };
+        let orders = [];
+
+
+        // ======================================================================
+        // [3] PRODUCT SERVICE (product-service.js)
+        // Manages product catalogue and inventory.
+        // ======================================================================
+        class ProductService {
+            constructor(data) {
+                this.products = data;
+            }
+
+            // Simulate network latency for API call
+            async delay() { return new Promise(resolve => setTimeout(resolve, 100)); }
+
+            async getProduct(productId) {
+                await this.delay();
+                log(`[Product Service] Getting product ID: ${productId}`, 'text-blue-400');
+                const product = this.products[productId];
+                if (!product) {
+                    log(`[Product Service] Error: Product ID ${productId} not found.`, 'text-red-400');
+                    return null;
+                }
+                return product;
+            }
+
+            async checkStock(productId, quantity) {
+                await this.delay();
+                const product = await this.getProduct(productId); 
+                if (!product) return false;
+                
+                if (product.stock >= quantity) {
+                    log(`[Product Service] Stock OK: ${product.name} has ${product.stock} in stock.`, 'text-yellow-400');
+                    return true;
+                } else {
+                    log(`[Product Service] Stock FAILED: Only ${product.stock} available for ${product.name}.`, 'text-red-400');
+                    return false;
+                }
+            }
+            
+            async decreaseStock(productId, quantity) {
+                await this.delay();
+                const product = this.products[productId];
+                if (product && product.stock >= quantity) {
+                    product.stock -= quantity;
+                    log(`[Product Service] Stock DECREASED: ${product.name} new stock is ${product.stock}.`, 'text-green-400');
+                    this.updateUI(); // Update UI after stock change
+                    return true;
+                }
+                return false;
+            }
+
+            // GÜNCELLENDİ: Ürün listesini tablo olarak gösterir
+            updateUI() {
+                const listContainer = document.getElementById('product-list');
+                const productsArray = Object.values(this.products);
+                
+                // HTML Tablo Başlıkları
+                let html = '<table class="min-w-full divide-y divide-gray-200">';
+                html += '<thead class="bg-gray-50"><tr><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th><th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th></tr></thead>';
+                html += '<tbody class="divide-y divide-gray-200">';
+                
+                // HTML Tablo İçeriği
+                productsArray.forEach(p => {
+                    // Stok durumuna göre renk ataması
+                    const stockClass = p.stock > 20 ? 'text-green-600' : p.stock > 0 ? 'text-yellow-600' : 'text-red-600';
+                    html += `
+                        <tr>
+                            <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${p.id}</td>
+                            <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700">${p.name}</td>
+                            <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 font-mono">$${p.price.toFixed(2)}</td>
+                            <td class="px-3 py-2 whitespace-nowrap text-sm font-bold ${stockClass}">${p.stock}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                listContainer.innerHTML = html;
+            }
+        }
+
+        // ======================================================================
+        // [4] USER SERVICE (user-service.js)
+        // Manages user information.
+        // ======================================================================
+        class UserService {
+            constructor(data) {
+                this.users = data;
+            }
+
+            async delay() { return new Promise(resolve => setTimeout(resolve, 50)); }
+
+            async getUser(userId) {
+                await this.delay();
+                log(`[User Service] Verifying user ID: ${userId}`, 'text-blue-400');
+                const user = this.users[userId];
+                if (!user) {
+                    log(`[User Service] Error: User ID ${userId} not found.`, 'text-red-400');
+                }
+                return user || null;
+            }
+            
+            // GÜNCELLENDİ: Kullanıcı listesini daha görsel bir kart/liste olarak gösterir
+            updateUI() {
+                const listContainer = document.getElementById('user-list');
+                const usersArray = Object.values(this.users);
+                
+                // HTML Liste Başlangıcı
+                let html = '<ul class="divide-y divide-gray-200">';
+                
+                // HTML Liste İçeriği
+                usersArray.forEach(u => {
+                    html += `
+                        <li class="py-3 px-3 flex items-center justify-between hover:bg-gray-50">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-900 truncate">
+                                    <span class="font-mono text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded-full mr-2">ID ${u.id}</span> ${u.name}
+                                </p>
+                                <p class="text-xs text-gray-500 truncate ml-12">${u.email}</p>
+                            </div>
+                            <div class="ml-2 flex-shrink-0">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    Active
+                                </span>
+                            </div>
+                        </li>
+                    `;
+                });
+                
+                html += '</ul>';
+                listContainer.innerHTML = html;
+            }
+        }
+
+        // ======================================================================
+        // [5] ORDER SERVICE (order-service.js)
+        // Creates orders and orchestrates calls to other services.
+        // ======================================================================
+        class OrderService {
+            constructor(userService, productService, orderStore) {
+                this.userService = userService;
+                this.productService = productService;
+                this.orderStore = orderStore;
+                this.orderCounter = 1;
+            }
+
+            async createOrder(userId, productId, quantity) {
+                log('--- ORDER CREATION STARTED ---', 'text-white font-bold');
+                
+                const user = await this.userService.getUser(userId);
+                if (!user) {
+                    log('Order FAILED: User validation failed.', 'text-red-400');
+                    return { success: false, message: 'Invalid User ID.' };
+                }
+                
+                const product = await this.productService.getProduct(productId);
+                if (!product) {
+                    log('Order FAILED: Product validation failed.', 'text-red-400');
+                    return { success: false, message: 'Invalid Product ID.' };
+                }
+
+                const hasStock = await this.productService.checkStock(productId, quantity);
+                if (!hasStock) {
+                    log('Order FAILED: Insufficient stock.', 'text-red-400');
+                    return { success: false, message: 'Insufficient stock available.' };
+                }
+                
+                const transactionSuccess = await this.productService.decreaseStock(productId, quantity);
+
+                if (!transactionSuccess) {
+                    log('Order FAILED: Failed to update inventory.', 'text-red-400');
+                    return { success: false, message: 'Inventory update failed.' };
+                }
+                
+                const newOrder = {
+                    orderId: this.orderCounter++,
+                    userId: user.id,
+                    productId: product.id,
+                    quantity: quantity,
+                    total: product.price * quantity,
+                    timestamp: new Date().toISOString()
+                };
+
+                this.orderStore.push(newOrder);
+
+                log(`Order SUCCESS #${newOrder.orderId}: Created for ${user.name}. Total: $${newOrder.total.toFixed(2)}`, 'text-lime-400 font-bold');
+                log('--- ORDER CREATION COMPLETED ---', 'text-white font-bold');
+
+                return { success: true, order: newOrder };
+            }
+        }
+
+        // ======================================================================
+        // [6] MAIN APPLICATION / BOOTSTRAP (main.js)
+        // Initializes services and sets up the event listener.
+        // ======================================================================
+
+        const pService = new ProductService(products);
+        const uService = new UserService(users);
+        const oService = new OrderService(uService, pService, orders); 
+
+        // Initial UI Render
+        pService.updateUI();
+        uService.updateUI();
+
+
+        // --- Event Handler ---
+        async function handlePlaceOrder() {
+            const btn = document.getElementById('placeOrderBtn');
+            const userIdInput = document.getElementById('userId');
+            const productIdInput = document.getElementById('productId');
+            const quantityInput = document.getElementById('quantity');
+
+            const userId = parseInt(userIdInput.value);
+            const productId = parseInt(productIdInput.value);
+            const quantity = parseInt(quantityInput.value);
+
+            if (isNaN(userId) || isNaN(productId) || isNaN(quantity) || quantity <= 0) {
+                log('Input Error: Please enter valid numbers for User ID, Product ID, and Quantity (> 0).', 'text-red-500');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+
+            try {
+                const result = await oService.createOrder(userId, productId, quantity);
+                
+                if (result.success) {
+                    // Update the UI again to show the stock decrease
+                    pService.updateUI(); 
+                }
+            } catch (error) {
+                log(`Critical System Error: ${error.message}`, 'text-red-500');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Place Order';
+            }
+        }
+
+    </script>
+</body>
+</html>
